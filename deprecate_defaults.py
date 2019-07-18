@@ -2,6 +2,7 @@ import functools
 import inspect
 import warnings
 
+
 def default_parameters(callable_):
     """Return set of parameter names in callable that have default values"""
     sig = inspect.signature(callable_)
@@ -55,20 +56,25 @@ def deprecated_defaults(*paramnames):
             return 1
 
     """
+
     def decorate(func):
         @functools.wraps(func)
         def deprecated(*args, **kwargs):
             unprovided = default_parameters(func) - kwargs.keys()
             deprecations = unprovided  # default to all defaults being required
-            if paramnames:             # filter by provided names
+            if paramnames:  # filter by provided names
                 deprecations = deprecations.intersection(paramnames)
 
             if deprecations:
-                msg = (f"Default values for parameters {sorted(deprecations)} "
-                       "are deprecated. Please provide explicit arguments.")
+                msg = (
+                    f"Default values for parameters {sorted(deprecations)} "
+                    "are deprecated. Please provide explicit arguments."
+                )
                 warnings.warn(msg, DeprecationWarning, stacklevel=2)
 
             result = func(*args, **kwargs)
             return result
+
         return deprecated
+
     return decorate
