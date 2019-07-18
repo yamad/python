@@ -3,7 +3,7 @@ import inspect
 import warnings
 
 def default_parameters(callable_):
-    """Return set of parameter names with default values for callable"""
+    """Return set of parameter names in callable that have default values"""
     sig = inspect.signature(callable_)
     default_names = []
     for param in sig.parameters.values():
@@ -13,18 +13,20 @@ def default_parameters(callable_):
 
 
 def deprecated_defaults(*paramnames):
-    """Decorator to deprecate default values for parameters
+    """Decorator to deprecate default parameter values
 
-    Defaults to deprecate are listed as strings as arguments to the
+    Default values to deprecate can be listed as arguments to the
     decorator (e.g. ``@deprecated_defaults("a")``). If no parameter
     names are provided, all parameters with default values are assumed
     deprecated (e.g. ``@deprecated_defaults()``).
 
     The intended use of the decorator is to signal to users that they
     should provide explicit values for parameters where they did not
-    necessarily have to before. Thus, an API can evolve, users are
-    warned, and confusing default behaviors are ultimately
-    removed. This decorator *does not* deprecate parameters,
+    have to before. This allows an API to evolve, giving users warning
+    of the eventual removal of confusing default behaviors. This
+    decorator *does not* deprecate parameters themselves. In fact, it
+    does somewhat the opposite: making previously optional parameters
+    required.
 
     For example, to require arguments for ``b``, ``c``, and
     ``d`` in ``foo``::
@@ -56,17 +58,14 @@ def deprecated_defaults(*paramnames):
     def decorate(func):
         @functools.wraps(func)
         def deprecated(*args, **kwargs):
-            defaults = default_parameters(func)
             unprovided = default_parameters(func) - kwargs.keys()
             deprecations = unprovided  # default to all defaults being required
             if paramnames:             # filter by provided names
                 deprecations = deprecations.intersection(paramnames)
 
             if deprecations:
-                names = list(deprecations)
-                names.sort()
-                msg = (f"Default values for parameters {names} are deprecated. "
-                       "Please provide explicit arguments.")
+                msg = (f"Default values for parameters {sorted(deprecations)} "
+                       "are deprecated. Please provide explicit arguments.")
                 warnings.warn(msg, DeprecationWarning, stacklevel=2)
 
             result = func(*args, **kwargs)

@@ -5,6 +5,7 @@ from deprecate_defaults import deprecated_defaults
 
 warnings.simplefilter("always")  # make sure DeprecationWarnings are issued
 
+
 def test_deprecate_all_defaults():
     def undecorated(a, b=None, c=1, d="string"):
         return 1
@@ -22,6 +23,7 @@ def test_deprecate_all_defaults():
         assert decorated("dummy", b="something") == 1
     with pytest.warns(DeprecationWarning, match=r"'c'"):
         assert decorated("dummy", b="something", d="else") == 1
+
 
 def test_deprecate_one():
     @deprecated_defaults("b")
