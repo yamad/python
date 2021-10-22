@@ -1,0 +1,8 @@
+numpy
+
+pytest
+hypothesis[numpy]
+pytest-cov
+
+ipython
+pip-tools
